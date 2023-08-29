@@ -1,0 +1,89 @@
+USE HR_EMP;
+
+-- SINGLE ROW SUBQUERY
+SELECT * FROM EMPLOYEES
+WHERE DEPARTMENT_ID = (SELECT DEPARTMENT_ID FROM DEPARTMENTS
+						WHERE DEPARTMENT_NAME='HUMAN RESOURCES');
+                        
+-- ABOVE QUERY IS SIMILAR TO 
+SELECT E.FIRST_NAME, D.DEPARTMENT_NAME
+FROM EMPLOYEES E
+JOIN DEPARTMENTS D
+ON E.DEPARTMENT_ID = D.DEPARTMENT_ID
+WHERE D.DEPARTMENT_NAME = 'HUMAN RESOURCES';
+
+
+-- MULTIPLE  ROW SUBQUERY
+SELECT * FROM EMPLOYEES
+WHERE DEPARTMENT_ID IN (SELECT DEPARTMENT_ID FROM DEPARTMENTS
+						WHERE DEPARTMENT_NAME IN ('FINANCE','EXECUTIVE'));
+
+-- SAL OF EMP > AVG(SAL) OF ALL EMPLOYEES
+SELECT *
+FROM EMPLOYEES
+WHERE SALARY > (
+    SELECT AVG(SALARY)
+    FROM EMPLOYEES
+);
+
+SELECT e1.*
+FROM EMPLOYEES e1
+JOIN (
+    SELECT AVG(SALARY) AS avg_salary
+    FROM EMPLOYEES
+) e2 ON e1.SALARY > e2.avg_salary;
+
+-- NO NEED OF SUBQUERY
+SELECT * FROM DEPARTMENTS
+WHERE DEPARTMENT_NAME IN (SELECT DEPARTMENT_NAME FROM DEPARTMENTS
+						WHERE DEPARTMENT_NAME IN ('FINANCE','EXECUTIVE'));
+SELECT * FROM DEPARTMENTS WHERE DEPARTMENT_NAME IN ('FINANCE','EXECUTIVE');
+                        
+
+-- NESTED SUBQUERY
+
+-- all rows from the "EMPLOYEES" table where the employee's department is located in the city 'PANAJI'
+SELECT *
+FROM EMPLOYEES
+WHERE DEPARTMENT_ID IN (
+    SELECT DEPARTMENT_ID
+    FROM DEPARTMENTS
+    WHERE LOCATION_ID IN (
+        SELECT LOCATION_ID
+        FROM LOCATIONS
+        WHERE CITY = 'PANAJI'
+    )
+);
+
+
+-- CASE
+
+drop table if exists books;
+
+CREATE TABLE books (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  title VARCHAR(100) NOT NULL,
+  author VARCHAR(100) NOT NULL,
+  publication_year INT,
+  isbn VARCHAR(20) UNIQUE
+);
+
+INSERT INTO books (title, author, publication_year, isbn)
+VALUES ('The Great Gatsby', 'F. Scott Fitzgerald', 1925, '9780743273565'),
+ ('To Kill a Mockingbird', 'Harper Lee', 2022, '9780060935467'),
+  ('1984', 'George Orwell', 1949, '9780451524935'),
+  ('The Catcher in the Rye', 'J.D. Salinger', 2015, '9780316769488'),
+  ('Pride and Prejudice', 'Jane Austen', 1813, '9780141439518'),
+  ('The Hobbit', 'J.R.R. Tolkien', 2010, '9780547928227');
+
+SELECT * FROM books;
+
+-- Retrieve the title and publication status of each book in the "books" table, based on the publication year
+SELECT title, 
+  CASE
+    WHEN publication_year >= 2020 THEN 'New'
+    WHEN publication_year >= 2010 THEN 'Recent'
+    ELSE 'Old'
+  END AS publication_status
+FROM books;
+
